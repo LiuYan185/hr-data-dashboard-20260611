@@ -289,7 +289,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
   <div class="ov-row" id="row-active"></div>
   <div class="section-chart-area">
     <div class="charts-row" style="grid-template-columns:1fr">
-      <div class="chart-card"><h3>各BU月度在职人数趋势</h3><canvas id="chart-bu-active"></canvas></div>
+      <div class="chart-card" style="padding:18px 24px"><h3>各BU月度在职人数趋势</h3><canvas id="chart-bu-active" style="max-height:360px"></canvas></div>
     </div>
     <div class="charts-row" style="grid-template-columns:1fr;margin-top:14px">
       <div class="chart-card"><h3>各BU新老员工构成</h3><canvas id="chart-bu-newold"></canvas><div class="chart-note">【新员工】2026年1月1日及以后入职、且截至统计日仍在职的员工。<br>【老员工】2025年12月31日及以前入职、且截至统计日仍在职的员工。</div></div>
@@ -349,7 +349,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 <div class="card-section" id="section-fill">
   <div class="card-section-header">
     <span class="card-section-label"><span class="card-section-num">4</span>满编率</span>
-    <span style="font-size:11px;color:#64748b">编制 / 在职 / 缺口 · 满编率 = 占编在职 / 编制总数</span>
+    <span style="font-size:11px;color:#64748b">编制 / 在职 / 空编 · 满编率 = 占编在职 / 编制总数</span>
   </div>
   <div class="ov-row" id="row-fill"></div>
   <div class="section-chart-area">
@@ -442,9 +442,9 @@ function renderActiveRow(){
     var d=D.bu_data[bu];
     var cls = d.netGrowth>50?'green-card':d.netGrowth>=0?'blue-card':'red-card';
     var ngSign = d.netGrowth>=0?'+':'';
-    html+='<div class="ov-card '+cls+'"><div class="bu-name">'+bu+'</div><div class="big-num">'+d.active.toLocaleString()+'</div><div class="small-info">净增 <span class="'+(d.netGrowth>=0?'text-green':'num-red')+'">'+ngSign+d.netGrowth+'</span></div></div>';
+    html+='<div class="ov-card '+cls+'"><div class="bu-name">'+bu+'</div><div class="big-num">'+d.active.toLocaleString()+'</div><div class="small-info">累计净增 <span class="'+(d.netGrowth>=0?'text-green':'num-red')+'">'+ngSign+d.netGrowth+'</span></div></div>';
   });
-  html+='<div class="ov-card gray-card" style="min-width:130px"><div class="bu-name">集团合计</div><div class="big-num">'+T.active.toLocaleString()+'</div><div class="small-info">净增 <span class="text-green">+'+T.netGrowth+'</span></div></div>';
+  html+='<div class="ov-card gray-card" style="min-width:130px"><div class="bu-name">集团合计</div><div class="big-num">'+T.active.toLocaleString()+'</div><div class="small-info">累计净增 <span class="text-green">+'+T.netGrowth+'</span></div></div>';
   document.getElementById('row-active').innerHTML=html;
 }
 
@@ -494,10 +494,10 @@ function renderFillRow(){
     var d=D.bu_data[bu];
     var gap = d.staff - d.filled;
     var cls = d.fillRate>=80?'green-card':d.fillRate>=60?'orange-card':'red-card';
-    html+='<div class="ov-card '+cls+'"><div class="bu-name">'+bu+'</div><div class="big-num">'+d.fillRate+'%</div><div class="small-info">编制 '+d.staff.toLocaleString()+'<br>缺口 <span class="num-red">'+gap+'</span></div></div>';
+    html+='<div class="ov-card '+cls+'"><div class="bu-name">'+bu+'</div><div class="big-num">'+d.fillRate+'%</div><div class="small-info">编制 '+d.staff.toLocaleString()+'<br>空编 <span class="num-red">'+gap+'</span></div></div>';
   });
   var tgap = T.staff - T.filled;
-  html+='<div class="ov-card gray-card" style="min-width:130px"><div class="bu-name">集团</div><div class="big-num">'+T.fillRate+'%</div><div class="small-info">编制 '+T.staff.toLocaleString()+'<br>缺口 <span class="num-red">'+tgap.toLocaleString()+'</span></div></div>';
+  html+='<div class="ov-card gray-card" style="min-width:130px"><div class="bu-name">集团</div><div class="big-num">'+T.fillRate+'%</div><div class="small-info">编制 '+T.staff.toLocaleString()+'<br>空编 <span class="num-red">'+tgap.toLocaleString()+'</span></div></div>';
   document.getElementById('row-fill').innerHTML=html;
 }
 
@@ -573,7 +573,7 @@ function baseOpts(yGrid=true){
   document.getElementById('ss-active').textContent = T.active.toLocaleString();
   document.getElementById('ss-active-sub').textContent = '国内 '+domActive.toLocaleString()+' · 海外 '+ovsActive.toLocaleString();
   document.getElementById('ss-fillrate').textContent = T.fillRate+'%';
-  document.getElementById('ss-fillrate-sub').textContent = '编制 '+T.staff.toLocaleString()+' · 缺口 '+gap.toLocaleString();
+  document.getElementById('ss-fillrate-sub').textContent = '编制 '+T.staff.toLocaleString()+' · 空编 '+gap.toLocaleString();
   document.getElementById('ss-netgrowth').textContent = (T.netGrowth>0?'+':'')+T.netGrowth.toLocaleString();
   document.getElementById('ss-netgrowth-sub').textContent = '年初至今累计净增';
   document.getElementById('ss-joined').textContent = T.joined.toLocaleString();
@@ -622,7 +622,7 @@ function renderWarnings(){
   document.getElementById('warn-cards').innerHTML =
     '<div class="warn-card">'+
       '<div class="warn-title">ABU 满编率严重偏低</div>'+
-      '<div class="warn-body">仅 <strong>55.9%</strong>，编制 492 人，在职 292 人，缺口 <strong>200 人</strong>。同时离职率 23.8%，人才流失加剧风险。</div>'+
+      '<div class="warn-body">仅 <strong>55.9%</strong>，编制 492 人，在职 292 人，空编 <strong>200 人</strong>。同时离职率 <strong style="color:#dc2626">23.8%</strong>，人才流失加剧风险。</div>'+
     '</div>'+
     '<div class="warn-card">'+
       '<div class="warn-title">高层骨干流失风险</div>'+
@@ -634,8 +634,8 @@ function renderWarnings(){
         Math.round(T.resigned>0?p1Resign/T.resigned*100:0)+'%。其中主动 <strong>'+(levelData['P1']?levelData['P1'].activeResign:0)+'</strong> 人，被动 <strong>'+(levelData['P1']?levelData['P1'].passiveResign:0)+'</strong> 人。</div>'+
     '</div>'+
     '<div class="warn-card yellow">'+
-      '<div class="warn-title">高离职率BU预警：GUS</div>'+
-      '<div class="warn-body">累计离职 <strong>'+(D.bu_data['GUS']?D.bu_data['GUS'].resigned:0)+' 人</strong>，离职率 <strong>'+(D.bu_data['GUS']?D.bu_data['GUS'].resignRate:0)+'%</strong>，远高于集团均值 '+T.resignRate+'%。GUS 同时是入职最多的BU（'+(D.bu_data['GUS']?D.bu_data['GUS'].joined:0)+' 人），入职-离职双高需审视用工稳定性。</div>'+
+      '<div class="warn-title">GUS 累计入职-离职双高预警</div>'+
+      '<div class="warn-body">累计离职 <strong>'+(D.bu_data['GUS']?D.bu_data['GUS'].resigned:0)+' 人</strong>，离职率 <strong>'+(D.bu_data['GUS']?D.bu_data['GUS'].resignRate:0)+'%</strong>，远高于集团均值 '+T.resignRate+'%。GUS 同时是累计入职最多的BU（'+(D.bu_data['GUS']?D.bu_data['GUS'].joined:0)+' 人），累计入职-离职双高需审视用工稳定性。</div>'+
     '</div>';
 }
 
@@ -699,7 +699,7 @@ function renderHealthTable(){
       thArrow('staff','编制')+
       thArrow('fillRate','满编率')+
       '<th>状态</th>'+
-      thArrow('gap','缺口')+
+      thArrow('gap','空编')+
       thArrow('joined','累计入职')+
       thArrow('resigned','累计离职')+
       thArrow('resignRate','离职率')+
@@ -752,7 +752,7 @@ function renderBuActiveChart(){
     type:'line',
     data:{
       labels:MONTH_LABELS_EARLY,
-      datasets:BU_ORDER.map(function(bu,i){return {label:bu,data:D.monthly_active[bu],borderColor:BU_PALETTE[i],backgroundColor:BU_PALETTE[i]+'22',tension:0.3,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:BU_PALETTE[i],borderWidth:2,fill:false,datalabels:{display:false}}})
+      datasets:BU_ORDER.map(function(bu,i){return {label:bu,data:D.monthly_active[bu],borderColor:BU_PALETTE[i],backgroundColor:BU_PALETTE[i]+'22',tension:0.3,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:BU_PALETTE[i],borderWidth:2,fill:false,datalabels:{anchor:'end',align:'top',font:{size:9,weight:'700'},color:'#1e293b',formatter:function(v){return v},offset:4}}})
     },
     options:Object.assign({},baseOpts(!1),{plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:10,font:{size:9},boxWidth:8}}}})
   });
@@ -926,7 +926,7 @@ function renderLevelTable(){
     '</tr>';
   }).join('');
   document.getElementById('level-table-wrap').innerHTML =
-    '<table class="level-table"><thead><tr><th>层级</th><th>在职</th><th>编制</th><th>满编率</th><th>占比</th><th>缺口</th><th>累计离职</th><th>主动/被动</th><th>主动占比</th></tr></thead><tbody>'+rows+'</tbody></table>';
+    '<table class="level-table"><thead><tr><th>层级</th><th>在职</th><th>编制</th><th>满编率</th><th>占比</th><th>空编</th><th>累计离职</th><th>主动/被动</th><th>主动占比</th></tr></thead><tbody>'+rows+'</tbody></table>';
 }
 
 /* ================================================================
