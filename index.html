@@ -494,10 +494,10 @@ function renderFillRow(){
     var d=D.bu_data[bu];
     var gap = d.staff - d.filled;
     var cls = d.fillRate>=80?'green-card':d.fillRate>=60?'orange-card':'red-card';
-    html+='<div class="ov-card '+cls+'"><div class="bu-name">'+bu+'</div><div class="big-num">'+d.fillRate+'%</div><div class="small-info">编制 '+d.staff.toLocaleString()+' · 缺口 <span class="num-red">'+gap+'</span></div></div>';
+    html+='<div class="ov-card '+cls+'"><div class="bu-name">'+bu+'</div><div class="big-num">'+d.fillRate+'%</div><div class="small-info">编制 '+d.staff.toLocaleString()+'<br>缺口 <span class="num-red">'+gap+'</span></div></div>';
   });
   var tgap = T.staff - T.filled;
-  html+='<div class="ov-card gray-card" style="min-width:130px"><div class="bu-name">集团</div><div class="big-num">'+T.fillRate+'%</div><div class="small-info">编制 '+T.staff.toLocaleString()+' · 缺口 <span class="num-red">'+tgap.toLocaleString()+'</span></div></div>';
+  html+='<div class="ov-card gray-card" style="min-width:130px"><div class="bu-name">集团</div><div class="big-num">'+T.fillRate+'%</div><div class="small-info">编制 '+T.staff.toLocaleString()+'<br>缺口 <span class="num-red">'+tgap.toLocaleString()+'</span></div></div>';
   document.getElementById('row-fill').innerHTML=html;
 }
 
