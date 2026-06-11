@@ -307,8 +307,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
   </div>
   <div class="ov-row" id="row-active"></div>
   <div class="section-chart-area">
-    <div class="spark-grid" id="spark-grid-active"></div>
-    <div class="charts-row" style="grid-template-columns:1fr;margin-top:14px">
+    <div class="charts-row equal">
+      <div class="chart-card" style="padding:18px 24px"><h3>各BU月度在职人数趋势</h3><canvas id="chart-bu-active" style="max-height:360px"></canvas></div>
       <div class="chart-card"><h3>各BU新老员工构成</h3><canvas id="chart-bu-newold"></canvas><div class="chart-note">【新员工】2026年1月1日及以后入职、且截至统计日仍在职的员工。<br>【老员工】2025年12月31日及以前入职、且截至统计日仍在职的员工。</div></div>
     </div>
   </div>
@@ -765,79 +765,14 @@ function renderBuNewOldChart(){
    6. 各BU月度在职趋势 (line)
    ================================================================ */
 function renderBuActiveChart(){
-  var sparkEl = document.getElementById('spark-grid-active');
-  var html = '';
-  
-  // Individual BU cards
-  BU_ORDER.forEach(function(bu,i){
-    var vals = D.monthly_active[bu];
-    var cur = vals[vals.length-1];
-    var prev = vals[0];
-    var delta = cur - prev;
-    var color = BU_PALETTE[i];
-    var deltaCls = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
-    var deltaSign = delta >= 0 ? '+' : '';
-    html += '<div class="spark-card" id="spark-'+bu+'">'+
-      '<div class="spark-top"><span class="spark-bu">'+bu+'</span><span class="spark-val" style="color:'+color+'">'+cur.toLocaleString()+'</span></div>'+
-      '<span class="spark-delta '+deltaCls+'">'+(delta!==0?deltaSign+delta:'持平')+'</span>'+
-      '<div class="spark-chart"><canvas id="spark-canvas-'+bu+'"></canvas></div>'+
-    '</div>';
+  new Chart(document.getElementById('chart-bu-active'),{
+    type:'line',
+    data:{
+      labels:MONTH_LABELS_EARLY,
+      datasets:BU_ORDER.map(function(bu,i){return {label:bu,data:D.monthly_active[bu],borderColor:BU_PALETTE[i],backgroundColor:BU_PALETTE[i]+'22',tension:0.3,pointRadius:3,pointHoverRadius:6,pointBackgroundColor:BU_PALETTE[i],borderWidth:2,fill:false,datalabels:{display:false}}})
+    },
+    options:Object.assign({},baseOpts(!1),{plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:10,font:{size:9},boxWidth:8}}}})
   });
-  
-  // Total card
-  var tVals = D.monthly_active_total;
-  var tCur = tVals[tVals.length-1];
-  var tPrev = tVals[0];
-  var tDelta = tCur - tPrev;
-  var tCls = tDelta > 0 ? 'up' : tDelta < 0 ? 'down' : 'flat';
-  html += '<div class="spark-card total">'+
-    '<div class="spark-top"><span class="spark-bu">集团合计</span><span class="spark-val">'+tCur.toLocaleString()+'</span></div>'+
-    '<span class="spark-delta '+tCls+'">'+(tDelta>=0?'+':'')+tDelta+'</span>'+
-    '<div class="spark-chart"><canvas id="spark-canvas-total"></canvas></div>'+
-  '</div>';
-  
-  sparkEl.innerHTML = html;
-  
-  // Create sparkline charts
-  function makeSparkline(canvasId, data, color){
-    var ctx = document.getElementById(canvasId);
-    if(!ctx) return;
-    var grad = ctx.getContext('2d').createLinearGradient(0,0,0,52);
-    grad.addColorStop(0, color+'33');
-    grad.addColorStop(1, color+'05');
-    new Chart(ctx,{
-      type:'line',
-      data:{
-        labels:MONTH_LABELS,
-        datasets:[{
-          data:data,
-          borderColor:color,
-          backgroundColor:grad,
-          borderWidth:2,
-          pointRadius:0,
-          pointHoverRadius:4,
-          pointHoverBackgroundColor:color,
-          tension:0.4,
-          fill:true
-        }]
-      },
-      options:{
-        responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{enabled:false},datalabels:{display:false}},
-        scales:{
-          x:{display:false},
-          y:{display:false,min:Math.min.apply(null,data)*0.92}
-        },
-        elements:{line:{borderJoinStyle:'round'}},
-        layout:{padding:{top:2,bottom:2}}
-      }
-    });
-  }
-  
-  BU_ORDER.forEach(function(bu,i){
-    makeSparkline('spark-canvas-'+bu, D.monthly_active[bu], BU_PALETTE[i]);
-  });
-  makeSparkline('spark-canvas-total', D.monthly_active_total, '#3f589a');
 }
 
 /* ================================================================
