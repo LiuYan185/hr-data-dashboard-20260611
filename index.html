@@ -820,16 +820,39 @@ function renderFlowChart(){
    9. 主动/被动离职分布 (grouped bar, by BU)
    ================================================================ */
 function renderActivePassiveChart(){
+  // 100% 堆叠图：计算各BU主动/被动离职占比
+  var pctData = BU_ORDER.map(function(bu){
+    var a = D.bu_data[bu].activeResign || 0;
+    var p = D.bu_data[bu].passiveResign || 0;
+    var total = a + p;
+    if(total === 0) return {active:0, passive:0};
+    return {active:Math.round(a/total*1000)/10, passive:Math.round(p/total*1000)/10};
+  });
   new Chart(document.getElementById('chart-active-passive'),{
     type:'bar',
     data:{
       labels:BU_ORDER,
       datasets:[
-        {label:'主动离职',data:BU_ORDER.map(function(bu){return D.bu_data[bu].activeResign}),backgroundColor:'rgba(238,118,35,0.8)',borderRadius:3,datalabels:{anchor:'center',color:'#fff',font:{weight:'700',size:9},formatter:function(v){return v>0?v:''}}},
-        {label:'被动离职',data:BU_ORDER.map(function(bu){return D.bu_data[bu].passiveResign}),backgroundColor:'rgba(148,163,184,0.7)',borderRadius:3,datalabels:{anchor:'center',color:'#1e293b',font:{weight:'700',size:9},formatter:function(v){return v>0?v:''}}}
+        {label:'主动离职占比',data:pctData.map(function(d){return d.active}),backgroundColor:'rgba(238,118,35,0.85)',borderRadius:3,datalabels:{anchor:'center',color:'#fff',font:{weight:'700',size:10},formatter:function(v){return v>0?v+'%':''}}},
+        {label:'被动离职占比',data:pctData.map(function(d){return d.passive}),backgroundColor:'rgba(148,163,184,0.75)',borderRadius:3,datalabels:{anchor:'center',color:'#1e293b',font:{weight:'700',size:10},formatter:function(v){return v>0?v+'%':''}}}
       ]
     },
-    options:baseOpts()
+    options:Object.assign({},baseOpts(),{
+      plugins:{
+        legend:{position:'bottom',labels:{usePointStyle:true,padding:10,font:{size:9},boxWidth:8}},
+        tooltip:{callbacks:{label:function(ctx){
+            var bu = BU_ORDER[ctx.dataIndex];
+            var key = ctx.datasetIndex===0 ? 'activeResign' : 'passiveResign';
+            var num = D.bu_data[bu] ? (D.bu_data[bu][key]||0) : 0;
+            var label = ctx.datasetIndex===0 ? '主动离职' : '被动离职';
+            return label+'：'+num+' 人';
+          }}}
+      },
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{font:{size:9}}},
+        y:{stacked:true,grid:{color:'#f1f5f9'},ticks:{font:{size:10},callback:function(v){return v+'%'}},max:100}
+      }
+    })
   });
 }
 
